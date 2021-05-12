@@ -48,75 +48,41 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (bind(sd, result->ai_addr, result->ai_addrlen) == -1)
-    {
-        std::cerr << "Error en la llamada al metodo bind \n";
-        exit(EXIT_FAILURE);
-    }
-
     //Libero la memoria de result
     freeaddrinfo(result);
-
-    //Poner el socket en el estado LISTEN
-    if(listen(sd, 10)== -1){
-        std::cerr << "Error al poner el socket en LISTEN \n";
-        exit(EXIT_FAILURE);
-    }
-
-
-    //Aceptar conexión
-    struct sockaddr addrClient;
-    socklen_t sockLength = sizeof(sockaddr);
-
-    //accept crea un socket en el otro extremo de la conexion, siendo la conexion
-    //la primera de la cola
-    int primeraConexion = accept(sd, &addrClient, &sockLength);
-
-    if(primeraConexion == -1){
-        std::cerr << "Error al aceptar la conexión \n";
-        exit(EXIT_FAILURE);
-    }
     
-    //Variables para gestionar al cliente
-    time_t timeRaw;
-    size_t tam;
+    //Establecer conexión, connect nos devuelve un socket
+    int id = connect(sd, result->ai_addr, result->ai_addrlen);
+    if(id == -1){
+        std::cerr << "Error al conectar \n";
+        exit(EXIT_FAILURE);
+    }
+
+
     bool serverAct = true;
     char buffer[MESSAGE_MAX_SIZE];
-    char host[NI_MAXHOST];
-    char serv[NI_MAXSERV];
-
-    //Obtenemos nombre y puerto del cliente y lo mostramos información por consola
-    getnameinfo(&addrClient, sockLength, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
-    std::cout << "Conexion desde " << host << " " << serv << "\n";
 
     while (serverAct)
     {
-        //Recibo el mensaje del cliente
-        int bytesRcv = recv(primeraConexion, (void *)buffer, (MESSAGE_MAX_SIZE - 1)*sizeof(char), 0);
-        buffer[MESSAGE_MAX_SIZE] = '\0';
+        //el cliente lee lo que ha puesto en consola y lo almacena en el buffer
+        std::cin >> buffer;
+        //le manda el mensaje al servidor
+        send(id, buffer, MESSAGE_MAX_SIZE - 1, 0);
 
-        //si recibe un mensaje vacio entonces termino el bucle
-        if (bytesRcv == -1)
-        {
-            std::cerr << "Error en la recepcion de bytes, cerrando conexión\n";
-            return EXIT_FAILURE;
-        }
-
-        if(buffer[0] == 'Q')
+        //si es una letra Q cierra la conexion
+        if(buffer[0] == 'Q' && buffer[1] == '\0')
         {
             serverAct = false;
-            std::cout << "Conexion terminada \n";
             continue;
         }
-        else
-        {
-            //el servidor contesta al cliente con el mismo mensaje que el cliente ha enviado
-            send(primeraConexion, buffer, bytesRcv, 0);
-        }
+        
+        //recibe la respuesta del servidor y la almacena en el buffer
+        recv(id, (void *)buffer, (MESSAGE_MAX_SIZE - 1)*sizeof(char), 0);
+        //escribe en la consola la respuesta del servidor
+        std::cout << buffer << "\n";
     }
 
     //Esto cierra el socket
     close(sd);
-    close(primeraConexion);
     return 0;
 }

@@ -78,8 +78,6 @@ int main(int argc, char **argv)
     }
     
     //Variables para gestionar al cliente
-    time_t timeRaw;
-    size_t tam;
     bool serverAct = true;
     char buffer[MESSAGE_MAX_SIZE];
     char host[NI_MAXHOST];
