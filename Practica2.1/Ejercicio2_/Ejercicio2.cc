@@ -55,7 +55,7 @@ int main(int argc, char **argv)
         std::cerr << "Error en la llamada al metodo bind \n";
         exit(EXIT_FAILURE);
     }
-
+    
     //Libero la memoria de result
     freeaddrinfo(result);
 
