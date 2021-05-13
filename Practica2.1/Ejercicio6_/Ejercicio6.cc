@@ -29,8 +29,9 @@ public:
     //Metodo a realizar en los threads
     void dameFechaUHora()
     {
-        time_t rawtime;
+        time_t timeRaw;
         size_t tam;
+        bool serverAct = true;
         char buffer[MESSAGE_MAX_SIZE];
         char host[NI_MAXHOST];
         char serv[NI_MAXSERV];
@@ -42,11 +43,8 @@ public:
         {
             //Para probar la concurrencia
             sleep(3); 
-
             int bytesReceived = recvfrom(sd, (void *)buffer, (MESSAGE_MAX_SIZE - 1) * sizeof(char), 0, &client, &clientLength);
             buffer[MESSAGE_MAX_SIZE] = '\0';
-            
-            int i = 0;
             
             if (bytesReceived == -1)
             {
@@ -57,22 +55,21 @@ public:
             //Obtenemos nombre y puerto del cliente y lo mostramos información por consola
             getnameinfo(&client, clientLength, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
             std::cout << bytesReceived << " bytes de " << host << ":" << serv << " thread: " << std::this_thread::get_id() << "\n";
-
             //Procesamos comandos
             switch (buffer[0])
             {
 
             //Mostrar hora
             case 't':
-                time(&rawtime);
-                tam = strftime(buffer, MESSAGE_MAX_SIZE - 1, "%T %p", localtime(&rawtime));
+                time(&timeRaw);
+                tam = strftime(buffer, MESSAGE_MAX_SIZE - 1, "%T %p", localtime(&timeRaw));
                 sendto(sd, buffer, tam, 0, &client, clientLength);
                 break;
 
             //Mostrar fecha
             case 'd':
-                time(&rawtime);
-                tam = strftime(buffer, MESSAGE_MAX_SIZE - 1, "%F", localtime(&rawtime));
+                time(&timeRaw);
+                tam = strftime(buffer, MESSAGE_MAX_SIZE - 1, "%F", localtime(&timeRaw));
                 sendto(sd, buffer, tam, 0, &client, clientLength);
                 break;
 
@@ -87,7 +84,6 @@ public:
 
 int main(int argc, char **argv)
 {
-
     struct addrinfo hints;
     struct addrinfo *result;
 
@@ -134,16 +130,10 @@ int main(int argc, char **argv)
     //Libero la memoria de result
     freeaddrinfo(result);
 
-    std::thread threads[MAX_THREADS];
-
     for (int i = 0; i < MAX_THREADS; i++)
     {
         MessageThread *mssgThread = new MessageThread(sd);
-        std::thread([&mssgThread]() 
-        {
-            mssgThread->dameFechaUHora(); 
-            delete mssgThread; 
-        });
+        std::thread([&mssgThread]() { mssgThread->dameFechaUHora(); delete mssgThread; }).detach();
     }
 
     //El thread principal(que es el main) cierra el server cuando recibe una q
