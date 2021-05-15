@@ -67,6 +67,8 @@ int main(int argc, char **argv)
     char host[NI_MAXHOST];
     char serv[NI_MAXSERV];
 
+    //Mientras el server este activado ire recogiendo los datos que pide el cliente con recvfrom y mandando una respuesta con sendto
+    //dependiendo de el valor del lugar 0 del buffer
     while (serverAct)
     {
         struct sockaddr client;
@@ -89,21 +91,21 @@ int main(int argc, char **argv)
         switch (buffer[0])
         {
 
-        //Muestra la hora
+        //Para mostrar la hora
         case 't':
             time(&timeRaw);
             tam = strftime(buffer, MESSAGE_MAX_SIZE - 1, "%T %p", localtime(&timeRaw));
             sendto(sd, buffer, tam, 0, &client, clientLength);
             break;
 
-        //Muestra la fecha
+        //Para mostrar la fecha
         case 'd':
             time(&timeRaw);
             tam = strftime(buffer, MESSAGE_MAX_SIZE - 1, "%F", localtime(&timeRaw));
             sendto(sd, buffer, tam, 0, &client, clientLength);
             break;
 
-        //Cerrar servidor
+        //Para cerrar el servidor
         case 'q':
             std::cout << "Saliendo...\n";
             serverAct = false;
