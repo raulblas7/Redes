@@ -72,7 +72,7 @@ public:
         return 0;
     }
 
-private:
+
     int16_t pos_x;
     int16_t pos_y;
 
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
     one_r.from_bin(buffer);
 
     // 5. Mostrar el contenido de one_r
-    std::cout << "Nombre one_r: " << one_r.name << "\n" << "pos_x: " << one_r.x  << "\n" << "pos_y: " << one_r.y << "\n";
+    std::cout << "Nombre one_r: " << one_r.name << "\n" << "pos_x: " << one_r.pos_x  << "\n" << "pos_y: " << one_r.pos_y << "\n";
 
     return 0;
 }
