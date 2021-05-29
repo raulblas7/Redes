@@ -62,6 +62,54 @@ void ChatServer::do_messages()
         // - LOGIN: Añadir al vector clients
         // - LOGOUT: Eliminar del vector clients
         // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
+
+		ChatMessage messg;
+		Socket* client = &socket;
+		socket.recv(messg, client);
+
+		std::unique_ptr<Socket> clientSocket(client);
+
+		switch (messg.type)
+		{
+			case 0:
+				//Si el tipo de mensaje es cero, es un mensaje de login, asi que se añade a la lista de clientes que tiene el servidor
+				clients.push_back(std::move(clientSocket));
+				std::cout << "Usuario " << messg.nick << " se ha unido" << std::endl;
+				break;
+			case 1:
+				//Si el tipo es uno, entonces es que un cliente ha enviado un mensaje al chat y el servidor avisa a todos los demas clientes del mensaje 
+				for (auto it = clients.begin(); it != clients.end(); it++)
+				{
+					if (!(**it == *clientSocket))
+					{
+						socket.send(messg, **it);
+					}
+				}
+				break;
+			case 2:
+			
+				//Si el tipo es dos, entonces es que un cliente se ha desconectado del server, lo busco y lo elimino del vector de clientes
+				bool encontrado = false;
+				auto it = clients.begin();
+				while (!encontrado && it != clients.end())
+				{
+					if (**it == *clientSocket)
+					{
+						it = clients.erase(it);
+						encontrado = true;
+					}
+					else
+					{
+						it++;
+					}
+				}
+				std::cout << "Usuario " << messg.nick << " se ha desconectado." << std::endl;
+				break;
+			
+			default:
+				break;
+			
+		}
     }
 }
 
