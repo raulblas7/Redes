@@ -33,7 +33,7 @@ int ChatMessage::from_bin(char * bobj)
 
     char* buffer = _data;
 
-    memcpy(type, buffer, sizeof(uint8_t));
+    memcpy(&type, buffer, sizeof(uint8_t));
     buffer += sizeof(uint8_t);
 
     nick = buffer;
@@ -87,7 +87,7 @@ void ChatServer::do_messages()
 				}
 				break;
 			case 2:
-			
+			{
 				//Si el tipo es dos, entonces es que un cliente se ha desconectado del server, lo busco y lo elimino del vector de clientes
 				bool encontrado = false;
 				auto it = clients.begin();
@@ -105,7 +105,7 @@ void ChatServer::do_messages()
 				}
 				std::cout << "Usuario " << messg.nick << " se ha desconectado." << std::endl;
 				break;
-			
+            }
 			default:
 				break;
 			

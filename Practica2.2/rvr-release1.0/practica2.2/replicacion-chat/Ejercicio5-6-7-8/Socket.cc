@@ -32,7 +32,7 @@ Socket::Socket(const char * address, const char * port):sd(-1)
     //Si no se puede crear el socket lanzo error
     if (sd == -1)
     {
-        std::cerr << "Error en la creación del socket \n";
+        std::cerr << "Error en la creaciï¿½n del socket \n";
         exit(EXIT_FAILURE);
     }
 
@@ -74,7 +74,7 @@ int Socket::send(Serializable& obj, const Socket& sock)
     //Enviar el objeto binario a sock usando el socket sd
     obj.to_bin();
 
-    ssize_t b = sendto(sock.sd, obj.data(), obj.size(), 0, &sock.sa, &sock.sa_len);
+    ssize_t b = sendto(sock.sd, obj.data(), obj.size(), 0, &sock.sa, sock.sa_len);
 
     if (b <= 0) {
         return -1;
@@ -89,7 +89,7 @@ bool operator== (const Socket &s1, const Socket &s2)
     //de la estructura sockaddr_in de los Sockets s1 y s2
     //Retornar false si alguno difiere
 
-    if (s1.sa.sa sa_family != s2.sa.sa_family) {
+    if (s1.sa.sa_family != s2.sa.sa_family) {
         return false;
     }
 
