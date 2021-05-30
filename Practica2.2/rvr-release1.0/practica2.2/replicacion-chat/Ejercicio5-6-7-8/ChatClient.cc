@@ -11,6 +11,8 @@ int main(int argc, char **argv)
 
     ec.input_thread();
 
+    net_thread.detach();
+
     return 0;
 }
 
