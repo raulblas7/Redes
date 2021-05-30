@@ -133,5 +133,7 @@ private:
      * Nick del usuario
      */
     std::string nick;
+
+    bool c = true;
 };
 

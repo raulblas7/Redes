@@ -139,7 +139,7 @@ void ChatClient::logout()
 
 void ChatClient::input_thread()
 {
-    while (true)
+    while (c)
     {
         // Leer stdin con std::getline
         // Enviar al servidor usando socket
@@ -147,17 +147,23 @@ void ChatClient::input_thread()
         std::getline(std::cin, msg);
 
         ChatMessage em(nick, msg);
-        em.type = ChatMessage::MESSAGE;
+
+        if(msg == "/exit"){
+            em.type = ChatMessage::LOGOUT;
+            c = false;
+        }
+        else{
+            em.type = ChatMessage::MESSAGE;
+            std::cout << "Mensaje -" << em.message << "- enviado" << std::endl;
+        }
 
         socket.send(em, socket);
-
-        std::cout << "Mensaje -" << em.message << "- enviado" << std::endl;
     }
 }
 
 void ChatClient::net_thread()
 {
-    while(true)
+    while(c)
     {
         //Recibir Mensajes de red
         //Mostrar en pantalla el mensaje de la forma "nick: mensaje"
